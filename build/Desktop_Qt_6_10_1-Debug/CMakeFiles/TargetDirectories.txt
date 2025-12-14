@@ -1,0 +1,9 @@
+/home/Wihy/Projects/CPP/RoyaleDeliveryClient/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/RoyaleDeliveryClient.dir
+/home/Wihy/Projects/CPP/RoyaleDeliveryClient/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/edit_cache.dir
+/home/Wihy/Projects/CPP/RoyaleDeliveryClient/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/rebuild_cache.dir
+/home/Wihy/Projects/CPP/RoyaleDeliveryClient/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/list_install_components.dir
+/home/Wihy/Projects/CPP/RoyaleDeliveryClient/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/install.dir
+/home/Wihy/Projects/CPP/RoyaleDeliveryClient/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/install/local.dir
+/home/Wihy/Projects/CPP/RoyaleDeliveryClient/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/install/strip.dir
+/home/Wihy/Projects/CPP/RoyaleDeliveryClient/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/RoyaleDeliveryClient_autogen_timestamp_deps.dir
+/home/Wihy/Projects/CPP/RoyaleDeliveryClient/build/Desktop_Qt_6_10_1-Debug/CMakeFiles/RoyaleDeliveryClient_autogen.dir
