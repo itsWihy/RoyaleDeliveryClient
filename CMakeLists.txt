@@ -14,8 +14,11 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core Gui Network)
 
 set(PROJECT_SOURCES
         main.cpp
+        network/remotepi.cpp
+        network/remotepi.h
         mainwindow.cpp
         mainwindow.h
+        global.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

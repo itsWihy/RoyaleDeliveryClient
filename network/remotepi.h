@@ -16,7 +16,10 @@ public:
     RemotePi(QWidget *parent = nullptr);
     ~RemotePi();
 
-    void connect_to_pi();
+    void connect_to_pi() const;
+
+    bool sign_up(QString name, QString password);
+    bool log_in(QString name, QString password);
 };
 
 #endif // REMOTEPI_H
