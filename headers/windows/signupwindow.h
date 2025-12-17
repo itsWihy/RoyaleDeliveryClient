@@ -15,6 +15,10 @@ private:
     QPushButton* sign_up_button;
     QPushButton* go_back_button;
 
+private slots:
+    void go_back();
+    void sign_up() const;
+
 public:
     explicit SignupWindow(QWidget* parent = nullptr);
     ~SignupWindow() override;
