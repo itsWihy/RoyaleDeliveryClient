@@ -18,7 +18,6 @@ set(PROJECT_SOURCES
         network/remotepi.h
         mainwindow.cpp
         mainwindow.h
-        global.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

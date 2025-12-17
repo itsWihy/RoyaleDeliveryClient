@@ -17,9 +17,9 @@ private slots:
     void log_in();
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
 
-    ~MainWindow();
+    ~MainWindow() override;
 };
 
 #endif // MAINWINDOW_H

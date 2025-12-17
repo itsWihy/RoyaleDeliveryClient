@@ -6,16 +6,24 @@
 class RemotePi : public QObject {
     Q_OBJECT
 
+public:
+    static RemotePi& getInstance() {
+        static RemotePi instance;
+        return instance;
+    }
+
+    RemotePi(const RemotePi&) = delete;
+    void operator=(const RemotePi&) = delete;
+
 private:
     QTcpSocket* connection = nullptr;
+
+    RemotePi();
 
 private slots:
     void print_error(QAbstractSocket::SocketError socketError);
 
 public:
-    RemotePi(QWidget *parent = nullptr);
-    ~RemotePi();
-
     void connect_to_pi() const;
 
     bool sign_up(QString name, QString password);

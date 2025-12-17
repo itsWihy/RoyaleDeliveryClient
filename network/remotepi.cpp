@@ -3,7 +3,7 @@
 #include <QtWidgets>
 #include <QtNetwork>
 
-RemotePi::RemotePi(QWidget *parent) : connection(new QTcpSocket(this)) {
+RemotePi::RemotePi() : connection(new QTcpSocket(this)) {
     connect(connection, &QAbstractSocket::errorOccurred, this, &RemotePi::print_error);
 }
 
@@ -15,7 +15,6 @@ void RemotePi::connect_to_pi() const {
 
 bool RemotePi::sign_up(QString name, QString password) {
     //send to PI: Name, Password
-
     return false;
 }
 
@@ -23,10 +22,6 @@ bool RemotePi::log_in(QString name, QString password) {
     return false;
 }
 
-void RemotePi::print_error(QAbstractSocket::SocketError socketError) {
-        std::cout << "Error: " << socketError;
-}
-
-RemotePi::~RemotePi() {
-    delete connection;
+void RemotePi::print_error(const QAbstractSocket::SocketError socketError) {
+    std::cout << "Error: " << socketError;
 }

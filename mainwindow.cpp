@@ -1,5 +1,6 @@
 #include "mainwindow.h"
-#include "global.h"
+
+#include "network/remotepi.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent) {
@@ -17,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void MainWindow::send_pi_hello() {
-    PI.connect_to_pi();
+    RemotePi::getInstance().connect_to_pi();
 }
 
 void MainWindow::sign_up() {
