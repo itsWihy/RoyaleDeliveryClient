@@ -1,8 +1,8 @@
-#include "mainwindow.h"
+#include "../headers/windows/mainwindow.h"
 
 #include <QApplication>
-#include <QPushButton>
-#include "network/remotepi.h"
+
+#include "../headers/windows/signupwindow.h"
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
@@ -11,5 +11,5 @@ int main(int argc, char *argv[]) {
     window.show();
 //https://wiki.qt.io/Qt_for_Beginners The observer pattern IS USEFUL READ!
 //https://wiki.qt.io/How_to_Use_QPushButton IS USEFUL READ!
-    return a.exec();
+    return QApplication::exec();
 }

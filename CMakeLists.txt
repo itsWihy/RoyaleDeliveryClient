@@ -11,20 +11,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core Gui Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core Gui Network)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 set(PROJECT_SOURCES
-        main.cpp
-        network/remotepi.cpp
-        network/remotepi.h
-        mainwindow.cpp
-        mainwindow.h
+        source/main.cpp
+        source/remotepi.cpp
+        headers/remotepi.h
+        source/windows/mainwindow.cpp
+        headers/windows/mainwindow.h
+        headers/windows/signupwindow.h
+        source/windows/signupwindow.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(RoyaleDeliveryClient
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        network/remotepi.h network/remotepi.cpp
+            headers/remotepi.h source/remotepi.cpp
+            headers/windows/signupwindow.h source/windows/signupwindow.cpp
 
     )
 # Define target properties for Android with Qt 6 as:
@@ -39,6 +43,7 @@ endif()
 
 target_link_libraries(RoyaleDeliveryClient PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui)
+target_link_libraries(RoyaleDeliveryClient PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

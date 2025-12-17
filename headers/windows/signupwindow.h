@@ -1,0 +1,23 @@
+#ifndef SIGNUPWINDOW_H
+#define SIGNUPWINDOW_H
+
+#include <qdialogbuttonbox.h>
+#include <qlineedit.h>
+#include <QMainWindow>
+#include <QObject>
+
+class SignupWindow : public QMainWindow {
+    Q_OBJECT
+
+private:
+    QLineEdit* name_button;
+    QLineEdit* password_button;
+    QPushButton* sign_up_button;
+    QPushButton* go_back_button;
+
+public:
+    explicit SignupWindow(QWidget* parent = nullptr);
+    ~SignupWindow() override;
+};
+
+#endif // SIGNUPWINDOW_H

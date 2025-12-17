@@ -1,4 +1,4 @@
-#include "remotepi.h"
+#include "../headers/remotepi.h"
 #include <iostream>
 #include <QtWidgets>
 #include <QtNetwork>
@@ -15,6 +15,8 @@ void RemotePi::connect_to_pi() const {
 
 bool RemotePi::sign_up(QString name, QString password) {
     //send to PI: Name, Password
+
+
     return false;
 }
 
