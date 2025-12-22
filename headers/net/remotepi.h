@@ -2,6 +2,7 @@
 #define REMOTEPI_H
 
 #include <QTcpSocket>
+#include <QDataStream>
 
 class RemotePi : public QObject {
     Q_OBJECT
@@ -16,23 +17,23 @@ public:
     void operator=(const RemotePi&) = delete;
 
 private:
-    QTcpSocket* connection = nullptr;
-    QDataStream* input;
-    QDataStream* output;
+    QTcpSocket connection;
+    QDataStream input;
+    QDataStream output;
 
     RemotePi();
 
     bool is_connected() const;
-    bool write_to_pi_raw(const QByteArray& data) const;
+    bool write_to_pi_raw(QByteArray& data);
     QString read_from_pi();
 
 private slots:
     void print_error(QAbstractSocket::SocketError socketError);
 
 public:
-    void connect_to_pi() const;
+    void connect_to_pi();
 
-    bool sign_up(const QString &name, const QString &password) const;
+    bool sign_up(const QString &name, const QString &password);
     bool log_in(QString name, QString password);
 };
 

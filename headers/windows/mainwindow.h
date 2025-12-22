@@ -8,8 +8,8 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 private:
-    QPushButton *sign_up_button;
-    QPushButton *log_in_button;
+    QPushButton sign_up_button;
+    QPushButton log_in_button;
 
 private slots:
     void send_pi_hello();

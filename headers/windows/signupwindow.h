@@ -4,16 +4,17 @@
 #include <qdialogbuttonbox.h>
 #include <qlineedit.h>
 #include <QMainWindow>
+#include <QPushButton>
 #include <QObject>
 
 class SignupWindow : public QMainWindow {
     Q_OBJECT
 
 private:
-    QLineEdit* name_button;
-    QLineEdit* password_button;
-    QPushButton* sign_up_button;
-    QPushButton* go_back_button;
+    QLineEdit name_button;
+    QLineEdit password_button;
+    QPushButton sign_up_button;
+    QPushButton go_back_button;
 
 private slots:
     void go_back();
