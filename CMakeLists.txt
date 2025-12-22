@@ -15,8 +15,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 set(PROJECT_SOURCES
         source/main.cpp
-        source/remotepi.cpp
-        headers/remotepi.h
+        source/net/remotepi.cpp
+        headers/net/remotepi.h
         source/windows/mainwindow.cpp
         headers/windows/mainwindow.h
         headers/windows/signupwindow.h
@@ -27,7 +27,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(RoyaleDeliveryClient
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-            headers/remotepi.h source/remotepi.cpp
+            headers/net/remotepi.h source/net/remotepi.cpp
             headers/windows/signupwindow.h source/windows/signupwindow.cpp
 
     )

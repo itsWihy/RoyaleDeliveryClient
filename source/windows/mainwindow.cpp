@@ -1,6 +1,6 @@
 #include "../../headers/windows/mainwindow.h"
 
-#include "../../headers/remotepi.h"
+#include "../../headers/net/remotepi.h"
 #include "../../headers/windows/signupwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void MainWindow::send_pi_hello() {
-    RemotePi::getInstance().connect_to_pi();
+    RemotePi::get_instance().connect_to_pi();
 }
 
 void MainWindow::sign_up() {

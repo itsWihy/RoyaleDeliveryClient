@@ -3,9 +3,11 @@
 #include <iostream>
 #include <qdebug.h>
 #include <qlabel.h>
+#include <QNetworkAccessManager>
 #include <qstatusbar.h>
 
 #include "../../headers/windows/mainwindow.h"
+#include "../../headers/net/remotepi.h"
 
 SignupWindow::SignupWindow(QWidget *parent) : QMainWindow(parent),
                                               name_button(new QLineEdit(this)),
@@ -19,11 +21,11 @@ SignupWindow::SignupWindow(QWidget *parent) : QMainWindow(parent),
     name_button->setGeometry(180, 50, 200, 30);
     password_button->setGeometry(180, 100, 200, 30);
 
-    const auto nameLabel = new QLabel("Enter name", this);
-    nameLabel->setGeometry(80, 50, 90, 30);
+    const auto name_label = new QLabel("Enter name", this);
+    name_label->setGeometry(80, 50, 90, 30);
 
-    const auto passwordLabel = new QLabel("Enter password", this);
-    passwordLabel->setGeometry(80, 100, 90, 30);
+    const auto password_label = new QLabel("Enter password", this);
+    password_label->setGeometry(80, 100, 90, 30);
 
     go_back_button->setGeometry(120, 180, 120, 50);
     sign_up_button->setGeometry(260, 180, 120, 50);
@@ -42,8 +44,8 @@ void SignupWindow::sign_up() const {
         return;
     }
 
-    qDebug().nospace() << "Name " << name << " and " << password;
-    //send Pi a packet.
+    bool success = RemotePi::get_instance().sign_up(name, password);
+    qDebug().nospace() << "Name " << name << " and " << password << " Suc: " << success;
 }
 
 void SignupWindow::go_back() {

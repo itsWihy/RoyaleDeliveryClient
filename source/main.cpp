@@ -9,7 +9,6 @@ int main(int argc, char *argv[]) {
 
     MainWindow window;
     window.show();
-//https://wiki.qt.io/Qt_for_Beginners The observer pattern IS USEFUL READ!
-//https://wiki.qt.io/How_to_Use_QPushButton IS USEFUL READ!
+
     return QApplication::exec();
 }
