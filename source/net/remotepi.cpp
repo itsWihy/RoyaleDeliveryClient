@@ -1,8 +1,8 @@
 #include "../../headers/net/remotepi.h"
+#include "../../headers/net/conversions.h"
 #include <iostream>
 #include <QtWidgets>
 #include <QtNetwork>
-
 
 RemotePi::RemotePi() : connection(this) {
     connect(&connection, &QAbstractSocket::errorOccurred, this, &RemotePi::print_error);
@@ -11,20 +11,6 @@ RemotePi::RemotePi() : connection(this) {
 
 bool RemotePi::is_connected() const {
     return connection.state() == QTcpSocket::ConnectedState;
-}
-
-qint32 byte_array_to_int(QByteArray source) {
-    qint32 size;
-    QDataStream temp{&source, QIODevice::WriteOnly};
-    temp >> size;
-    return size;
-}
-
-QByteArray int_to_byte_array(qint32 number) {
-    QByteArray size;
-    QDataStream temp{&size, QIODevice::WriteOnly};
-    temp << number;
-    return size;
 }
 
 bool RemotePi::write_to_pi_raw(QByteArray &data) {

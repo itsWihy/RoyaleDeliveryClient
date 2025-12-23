@@ -14,6 +14,7 @@ SignupWindow::SignupWindow(QWidget *parent) : QMainWindow(parent),
                                               password_button(this),
                                               sign_up_button("Sign Up", this),
                                               go_back_button("Go Back", this) {
+
     setAttribute(Qt::WA_DeleteOnClose);
     setFixedSize(500, 300);
     setToolTip("Royale Sign UP!");
