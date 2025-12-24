@@ -12,7 +12,6 @@ private:
     QPushButton log_in_button;
 
 private slots:
-    void send_pi_hello();
     void sign_up();
     void log_in();
 

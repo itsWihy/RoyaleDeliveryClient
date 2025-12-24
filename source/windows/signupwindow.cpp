@@ -8,6 +8,8 @@
 
 #include "../../headers/windows/mainwindow.h"
 #include "../../headers/net/remotepi.h"
+#include "../../headers/windows/loginwindow.h"
+#include "../../headers/windows/popups.h"
 
 SignupWindow::SignupWindow(QWidget *parent) : QMainWindow(parent),
                                               name_button(this),
@@ -36,51 +38,34 @@ SignupWindow::SignupWindow(QWidget *parent) : QMainWindow(parent),
     connect(&RemotePi::get_instance(), SIGNAL(server_message_received(Command,QString)), this, SLOT(handle_server_cmd(Command,QString)));
 }
 
-void error_popup(const SignupWindow* const window, const QString &error) {
-    window->statusBar()->setStyleSheet("color: red");
-    window->statusBar()->showMessage(error, 5000);
-}
-
-void success_popup(const SignupWindow* const window, const QString &success) {
-    window->statusBar()->setStyleSheet("color: green");
-    window->statusBar()->showMessage(success, 5000);
-}
-
-void SignupWindow::sign_up() const {
+bool SignupWindow::sign_up() const {
     const QString name = name_button.text();
     const QString password = password_button.text();
 
-    if (name.isEmpty() || password.isEmpty() || name.length() > 8 || password.length() > 8) {
-        error_popup(this, "Name and password must be between 1 and 8 characters long.");
-        return;
-    }
+    if (name.isEmpty() || password.isEmpty() || name.length() > 8 || password.length() > 8)
+        return error_popup(this, "Name and password must be between 1 and 8 characters long.");
 
-    if (name.contains(":") || password.contains(":")) {
-        error_popup(this, "Name and password may not contain a colon");
-        return;
-    }
+    if (name.contains(":") || password.contains(":"))
+        return error_popup(this, "Name and password may not contain a colon");
 
-    bool success = RemotePi::get_instance().sign_up(name, password);
+    if (const bool success = RemotePi::get_instance().sign_up(name, password); !success)
+        return error_popup(this, "Couldn't reach server");
 
-    if (!success) {
-        error_popup(this, "Couldn't reach server");
-        return;
-    }
-
-    success_popup(this, "Registered at server with name");
-    qDebug().nospace() << "Name " << name << " and " << password << " Suc: " << success;
+    return true;
 }
 
-
-void SignupWindow::handle_server_cmd(const Command cmd, QString message) const {
+void SignupWindow::handle_server_cmd(const Command cmd, QString message) {
     if (!message.startsWith("SIGNUP")) return;
 
     if (cmd == STATUS) {
         message.remove(0,6);
 
         if (message == "TRUE") {
-            success_popup(this, "Successfully registered!");
-            //TODO: move on to login window when you ahve it lol
+            auto* login = new LoginWindow();
+            login->show();
+            this->close();
+
+            success_popup(login, "Successfully registered!");
         } else {
             error_popup(this, "Something went wrong.. check connection and try a different username");
         }

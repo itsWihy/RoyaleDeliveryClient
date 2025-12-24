@@ -1,6 +1,7 @@
 #include "../../headers/windows/mainwindow.h"
 
 #include "../../headers/net/remotepi.h"
+#include "../../headers/windows/loginwindow.h"
 #include "../../headers/windows/signupwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -12,11 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     log_in_button.setGeometry(150, 150, 200, 100);
 
     connect(&sign_up_button, &QPushButton::clicked, this, &MainWindow::sign_up);
-    connect(&log_in_button, &QPushButton::clicked, this, &MainWindow::send_pi_hello);
-}
-
-void MainWindow::send_pi_hello() {
-    RemotePi::get_instance().connect_to_pi();
+    connect(&log_in_button, &QPushButton::clicked, this, &MainWindow::log_in);
 }
 
 void MainWindow::sign_up() {
@@ -28,6 +25,11 @@ void MainWindow::sign_up() {
 }
 
 void MainWindow::log_in() {
+    RemotePi::get_instance().connect_to_pi();
+
+    auto* login = new LoginWindow();
+    login->show();
+    this->close();
 }
 
 

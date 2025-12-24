@@ -37,16 +37,20 @@ void RemotePi::handle_server_data() const {
     if (!stream.commitTransaction()) return;
 
     switch (cmd_type) {
-        case STATUS:
+        case STATUS: {
             QString type, result;
             stream >> type >> result;
 
-            if (type == "SIGNUP") {
+            if (type == "SIGNUP")
                 result.prepend("SIGNUP");
-                emit server_message_received(STATUS, result);
-            }
+
+            if (type == "LOGIN")
+                result.prepend("LOGIN");
+
+            emit server_message_received(STATUS, result);
 
             break;
+        }
     }
 }
 

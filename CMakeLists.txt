@@ -22,6 +22,9 @@ set(PROJECT_SOURCES
         headers/windows/signupwindow.h
         source/windows/signupwindow.cpp
         headers/net/commands.h
+        source/windows/loginwindow.cpp
+        headers/windows/loginwindow.h
+        headers/windows/popups.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

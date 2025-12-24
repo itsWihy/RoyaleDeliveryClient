@@ -19,9 +19,10 @@ private:
     QPushButton go_back_button;
 
 private slots:
+    bool sign_up() const;
+
     void go_back();
-    void sign_up() const;
-    void handle_server_cmd(Command cmd, QString message) const;
+    void handle_server_cmd(Command cmd, QString message);
 
 public:
     explicit SignupWindow(QWidget* parent = nullptr);
