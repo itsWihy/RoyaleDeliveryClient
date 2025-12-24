@@ -26,8 +26,8 @@ private:
     RemotePi();
 
     bool is_connected() const;
-    bool send_cmd_to_pi(Command cmd_type, const QStringList& parameters);
-    QString read_from_pi();
+    bool send_cmd_to_server(Command cmd_type, const QStringList& parameters);
+    void handle_server_data() const;
 
 private slots:
     static void handle_error(QAbstractSocket::SocketError socketError) ;

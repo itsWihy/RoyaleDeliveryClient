@@ -5,24 +5,44 @@
 
 RemotePi::RemotePi() : connection(this) {
     connect(&connection, &QAbstractSocket::errorOccurred, this, &RemotePi::handle_error);
-    connect(&connection, &QTcpSocket::readyRead, this, &RemotePi::read_from_pi);
+    connect(&connection, &QTcpSocket::readyRead, this, &RemotePi::handle_server_data);
 }
 
 bool RemotePi::is_connected() const {
     return connection.state() == QTcpSocket::ConnectedState;
 }
 
-bool RemotePi::send_cmd_to_pi(const Command cmd_type, const QStringList& parameters) {
+bool RemotePi::send_cmd_to_server(const Command cmd_type, const QStringList& parameters) {
     if (!is_connected()) return false;
     const QByteArray data{pack_data(cmd_type, parameters)};
 
     return connection.write(data) >= 0;
 }
 
-QString RemotePi::read_from_pi() { //TODO: Implement properly. error codes and such! server will send success/failure.
-    if (connection.bytesAvailable() == 0) return "";
-    qDebug() << "Server replied: " << connection.readAll();
-    return " ";
+void RemotePi::handle_server_data() const {
+//todo: custom signal: DIDNT sign UP. or something. then listen for signal on all windows, and write it when received!
+// Also make status signals appear everywehre.
+    auto *socket = qobject_cast<QTcpSocket *>(sender());
+
+    QDataStream stream(socket->readAll());
+    stream.setVersion(QDataStream::Qt_5_15);
+
+    stream.startTransaction();
+
+    quint32 length, cmd_type;
+    stream >> length >> cmd_type;
+
+    if (!stream.commitTransaction()) return;
+
+    switch (cmd_type) {
+        case STATUS:
+            QString type, result;
+            stream >> type >> result;
+
+            qDebug() << type << " and " << result;
+
+            break;
+    }
 }
 
 void RemotePi::connect_to_pi() {
@@ -32,11 +52,11 @@ void RemotePi::connect_to_pi() {
  }
 
 bool RemotePi::sign_up(const QString &name, const QString &password) {
-    return send_cmd_to_pi(SIGN_UP, {name, password});
+    return send_cmd_to_server(SIGN_UP, {name, password});
 }
 
 bool RemotePi::log_in(const QString& name, const QString& password) {
-    return send_cmd_to_pi(LOG_IN, {name, password});
+    return send_cmd_to_server(LOG_IN, {name, password});
 }
 
 void RemotePi::handle_error(const QAbstractSocket::SocketError socketError) {
