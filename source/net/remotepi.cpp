@@ -13,63 +13,51 @@ bool RemotePi::is_connected() const {
     return connection.state() == QTcpSocket::ConnectedState;
 }
 
-bool RemotePi::write_to_pi_raw(QByteArray &data) {
+bool RemotePi::send_cmd_to_pi(const Command cmd_type, const QStringList& parameters) {
     if (!is_connected()) return false;
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+    stream.setVersion(QDataStream::Qt_5_15);
 
-    connection.write(int_to_byte_array(data.size()));
-    connection.write(data);
+    stream << quint32(0);
+    stream << quint32(cmd_type);
 
-    return connection.waitForBytesWritten();
-}
-
-QString RemotePi::read_from_pi() {
-    QString data = "";
-
-    QByteArray buffer {};
-    qint32 size = 0;
-
-    while (connection.bytesAvailable() > 0) {
-        buffer.append(connection.readAll());
-
-        while ((size == 0 && buffer.size() >= 4) || (size > 0 && buffer.size() >= size)) {
-            if (size == 0 && buffer.size() >= 4) {
-                size = byte_array_to_int( buffer.mid(0, 4));
-                buffer.remove(0, 4);
-            }
-
-            if (size > 0 && buffer.size() >= size) {
-                data = QString::fromUtf8(buffer.mid(0, size));
-            }
-        }
+    for (const QString& parameter : parameters) {
+        stream << parameter;
     }
 
-    return data;
+    const quint32 payload_size = data.size() - sizeof(quint32);
+
+    stream.device()->seek(0);
+    stream << payload_size;
+
+    connection.write(data);
+    return true;
+}
+
+QString RemotePi::read_from_pi() { //TODO: Implement properly. error codes and such! server will send success/failure.
+    if (connection.bytesAvailable() == 0) return "";
+
+    qDebug() << "Server replied: " << connection.readAll();
+    return " ";
 }
 
 void RemotePi::connect_to_pi() {
     std::cout << "Connecting to PI..." << std::endl;
     connection.abort();
     connection.connectToHost(QHostAddress("192.168.1.156"), 5004);
-
-    if (is_connected())
-        std::cout << "Connected successfully!" << std::endl;
  }
 
 bool RemotePi::sign_up(const QString &name, const QString &password) {
-    if (!is_connected()) return false;
+    QString new_name = QString("jeff");
+    QString new_password = QString("peesta");
+    //todo remove
 
-    QByteArray toSend{};
-
-    toSend.append(int_to_byte_array(name.size()));
-    toSend.append(name.toUtf8());
-
-    toSend.append(int_to_byte_array(password.size()));
-    toSend.append(password.toUtf8());
-
-    return write_to_pi_raw(toSend);
+    return send_cmd_to_pi(SIGN_UP, {new_name, new_password});
 }
 
 bool RemotePi::log_in(QString name, QString password) {
+    //todo: Impl
     return false;
 }
 

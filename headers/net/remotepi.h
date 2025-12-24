@@ -4,6 +4,8 @@
 #include <QTcpSocket>
 #include <QDataStream>
 
+#include "commands.h"
+
 class RemotePi : public QObject {
     Q_OBJECT
 
@@ -24,7 +26,7 @@ private:
     RemotePi();
 
     bool is_connected() const;
-    bool write_to_pi_raw(QByteArray& data);
+    bool send_cmd_to_pi(Command cmd_type, const QStringList& parameters);
     QString read_from_pi();
 
 private slots:

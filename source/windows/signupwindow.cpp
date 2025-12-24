@@ -39,11 +39,12 @@ void SignupWindow::sign_up() const {
     const QString name = name_button.text();
     const QString password = password_button.text();
 
-    if (name.isEmpty() || password.isEmpty()) {
-        this->statusBar()->setStyleSheet("color: red");
-        this->statusBar()->showMessage("Please fill both fields", 5000);
-        return;
-    }
+    //TODO: Bring back.
+    // if (name.isEmpty() || password.isEmpty()) {
+    //     this->statusBar()->setStyleSheet("color: red");
+    //     this->statusBar()->showMessage("Please fill both fields", 5000);
+    //     return;
+    // }
 
     bool success = RemotePi::get_instance().sign_up(name, password);
     qDebug().nospace() << "Name " << name << " and " << password << " Suc: " << success;

@@ -20,6 +20,8 @@ void MainWindow::send_pi_hello() {
 }
 
 void MainWindow::sign_up() {
+    RemotePi::get_instance().connect_to_pi();
+
     auto* signup = new SignupWindow();
     signup->show();
     this->close();
