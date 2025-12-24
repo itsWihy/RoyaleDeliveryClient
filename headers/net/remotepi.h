@@ -37,6 +37,10 @@ public:
 
     bool sign_up(const QString &name, const QString &password);
     bool log_in(const QString& name, const QString& password);
+
+signals:
+    void server_message_received(Command cmd, QString message) const;
+
 };
 
 #endif // REMOTEPI_H

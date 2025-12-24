@@ -7,6 +7,8 @@
 #include <QPushButton>
 #include <QObject>
 
+#include "../net/commands.h"
+
 class SignupWindow : public QMainWindow {
     Q_OBJECT
 
@@ -19,10 +21,12 @@ private:
 private slots:
     void go_back();
     void sign_up() const;
+    void handle_server_cmd(Command cmd, QString message) const;
 
 public:
     explicit SignupWindow(QWidget* parent = nullptr);
     ~SignupWindow() override;
+
 };
 
 #endif // SIGNUPWINDOW_H

@@ -1,7 +1,11 @@
 #include "../../headers/net/remotepi.h"
+
 #include <iostream>
-#include <QtWidgets>
 #include <QtNetwork>
+#include <QtWidgets>
+
+#include "../../headers/windows/signupwindow.h"
+
 
 RemotePi::RemotePi() : connection(this) {
     connect(&connection, &QAbstractSocket::errorOccurred, this, &RemotePi::handle_error);
@@ -20,8 +24,6 @@ bool RemotePi::send_cmd_to_server(const Command cmd_type, const QStringList& par
 }
 
 void RemotePi::handle_server_data() const {
-//todo: custom signal: DIDNT sign UP. or something. then listen for signal on all windows, and write it when received!
-// Also make status signals appear everywehre.
     auto *socket = qobject_cast<QTcpSocket *>(sender());
 
     QDataStream stream(socket->readAll());
@@ -39,7 +41,10 @@ void RemotePi::handle_server_data() const {
             QString type, result;
             stream >> type >> result;
 
-            qDebug() << type << " and " << result;
+            if (type == "SIGNUP") {
+                result.prepend("SIGNUP");
+                emit server_message_received(STATUS, result);
+            }
 
             break;
     }
