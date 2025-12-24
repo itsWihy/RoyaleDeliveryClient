@@ -21,7 +21,6 @@ set(PROJECT_SOURCES
         headers/windows/mainwindow.h
         headers/windows/signupwindow.h
         source/windows/signupwindow.cpp
-        headers/net/conversions.h
         headers/net/commands.h
 )
 

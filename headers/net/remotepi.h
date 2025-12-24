@@ -30,13 +30,13 @@ private:
     QString read_from_pi();
 
 private slots:
-    void print_error(QAbstractSocket::SocketError socketError);
+    static void handle_error(QAbstractSocket::SocketError socketError) ;
 
 public:
     void connect_to_pi();
 
     bool sign_up(const QString &name, const QString &password);
-    bool log_in(QString name, QString password);
+    bool log_in(const QString& name, const QString& password);
 };
 
 #endif // REMOTEPI_H

@@ -1,11 +1,10 @@
 #include "../../headers/net/remotepi.h"
-#include "../../headers/net/conversions.h"
 #include <iostream>
 #include <QtWidgets>
 #include <QtNetwork>
 
 RemotePi::RemotePi() : connection(this) {
-    connect(&connection, &QAbstractSocket::errorOccurred, this, &RemotePi::print_error);
+    connect(&connection, &QAbstractSocket::errorOccurred, this, &RemotePi::handle_error);
     connect(&connection, &QTcpSocket::readyRead, this, &RemotePi::read_from_pi);
 }
 
@@ -15,29 +14,13 @@ bool RemotePi::is_connected() const {
 
 bool RemotePi::send_cmd_to_pi(const Command cmd_type, const QStringList& parameters) {
     if (!is_connected()) return false;
-    QByteArray data;
-    QDataStream stream(&data, QIODevice::WriteOnly);
-    stream.setVersion(QDataStream::Qt_5_15);
+    const QByteArray data{pack_data(cmd_type, parameters)};
 
-    stream << quint32(0);
-    stream << quint32(cmd_type);
-
-    for (const QString& parameter : parameters) {
-        stream << parameter;
-    }
-
-    const quint32 payload_size = data.size() - sizeof(quint32);
-
-    stream.device()->seek(0);
-    stream << payload_size;
-
-    connection.write(data);
-    return true;
+    return connection.write(data) >= 0;
 }
 
 QString RemotePi::read_from_pi() { //TODO: Implement properly. error codes and such! server will send success/failure.
     if (connection.bytesAvailable() == 0) return "";
-
     qDebug() << "Server replied: " << connection.readAll();
     return " ";
 }
@@ -49,18 +32,39 @@ void RemotePi::connect_to_pi() {
  }
 
 bool RemotePi::sign_up(const QString &name, const QString &password) {
-    QString new_name = QString("jeff");
-    QString new_password = QString("peesta");
-    //todo remove
-
-    return send_cmd_to_pi(SIGN_UP, {new_name, new_password});
+    return send_cmd_to_pi(SIGN_UP, {name, password});
 }
 
-bool RemotePi::log_in(QString name, QString password) {
-    //todo: Impl
-    return false;
+bool RemotePi::log_in(const QString& name, const QString& password) {
+    return send_cmd_to_pi(LOG_IN, {name, password});
 }
 
-void RemotePi::print_error(const QAbstractSocket::SocketError socketError) {
-    std::cout << "Error: " << socketError;
+void RemotePi::handle_error(const QAbstractSocket::SocketError socketError) {
+    const char* errorMessage = nullptr;
+
+    switch (socketError) {
+        case QAbstractSocket::ConnectionRefusedError:
+            errorMessage = "Connection refused by the peer";
+            break;
+        case QAbstractSocket::RemoteHostClosedError:
+            errorMessage = "Remote host closed the connection";
+            break;
+        case QAbstractSocket::HostNotFoundError:
+            errorMessage = "Host not found";
+            break;
+        case QAbstractSocket::SocketAccessError:
+            errorMessage = "Socket access error (permission issue)";
+            break;
+        case QAbstractSocket::SocketTimeoutError:
+            errorMessage = "Socket operation timed out";
+            break;
+        case QAbstractSocket::NetworkError:
+            errorMessage = "Network error";
+            break;
+        default:
+            errorMessage = "Unknown socket error";
+            break;
+    }
+
+    std::cerr << "[Socket Error] Code: " << socketError << ", Message: " << errorMessage << std::endl;
 }

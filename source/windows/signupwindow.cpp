@@ -35,19 +35,38 @@ SignupWindow::SignupWindow(QWidget *parent) : QMainWindow(parent),
     connect(&go_back_button, &QPushButton::clicked, this, &SignupWindow::go_back);
 }
 
+void error(const SignupWindow* const window, const QString &error) {
+    window->statusBar()->setStyleSheet("color: red");
+    window->statusBar()->showMessage(error, 5000);
+}
+
 void SignupWindow::sign_up() const {
     const QString name = name_button.text();
     const QString password = password_button.text();
 
-    //TODO: Bring back.
-    // if (name.isEmpty() || password.isEmpty()) {
-    //     this->statusBar()->setStyleSheet("color: red");
-    //     this->statusBar()->showMessage("Please fill both fields", 5000);
-    //     return;
-    // }
+    if (name.isEmpty() || password.isEmpty() || name.length() > 8 || password.length() > 8) {
+        error(this, "Name and password must be between 1 and 8 characters long.");
+        return;
+    }
+
+    if (name.contains(":") || password.contains(":")) {
+        error(this, "Name and password may not contain a colon");
+        return;
+    }
 
     bool success = RemotePi::get_instance().sign_up(name, password);
+
+    if (!success) {
+        error(this, "Couldn't reach server");
+        return;
+    }
+
+    this->statusBar()->setStyleSheet("color: green");
+    this->statusBar()->showMessage("Registered at server with name");
+
     qDebug().nospace() << "Name " << name << " and " << password << " Suc: " << success;
+
+    //get server response. if successful: move to login page.
 }
 
 void SignupWindow::go_back() {
