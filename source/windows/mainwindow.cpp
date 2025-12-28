@@ -3,6 +3,7 @@
 #include "../../headers/net/remotepi.h"
 #include "../../headers/windows/loginwindow.h"
 #include "../../headers/windows/signupwindow.h"
+#include "../../headers/windows/windowutils.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), sign_up_button("Sign Up", this), log_in_button("Log in", this) {
@@ -18,18 +19,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::sign_up() {
     RemotePi::get_instance().connect_to_pi();
-
-    auto* signup = new SignupWindow();
-    signup->show();
-    this->close();
+    openAndClose(this, new SignupWindow());
 }
 
 void MainWindow::log_in() {
     RemotePi::get_instance().connect_to_pi();
-
-    auto* login = new LoginWindow();
-    login->show();
-    this->close();
+    openAndClose(this, new LoginWindow());
 }
 
 

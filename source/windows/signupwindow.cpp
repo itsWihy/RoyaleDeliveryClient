@@ -9,15 +9,13 @@
 #include "../../headers/windows/mainwindow.h"
 #include "../../headers/net/remotepi.h"
 #include "../../headers/windows/loginwindow.h"
-#include "../../headers/windows/popups.h"
+#include "../../headers/windows/windowutils.h"
 
 SignupWindow::SignupWindow(QWidget *parent) : QMainWindow(parent),
                                               name_button(this),
                                               password_button(this),
                                               sign_up_button("Sign Up", this),
                                               go_back_button("Go Back", this) {
-
-    setAttribute(Qt::WA_DeleteOnClose);
     setFixedSize(500, 300);
     setToolTip("Royale Sign UP!");
 
@@ -62,8 +60,7 @@ void SignupWindow::handle_server_cmd(const Command cmd, QString message) {
 
         if (message == "TRUE") {
             auto* login = new LoginWindow();
-            login->show();
-            this->close();
+            openAndClose(this, login);
 
             success_popup(login, "Successfully registered!");
         } else {
@@ -74,9 +71,7 @@ void SignupWindow::handle_server_cmd(const Command cmd, QString message) {
 
 
 void SignupWindow::go_back() {
-    auto* window = new MainWindow();
-    window->show();
-    this->close();
+    openAndClose(this, new MainWindow());
 }
 
 SignupWindow::~SignupWindow() = default;

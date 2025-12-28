@@ -24,7 +24,7 @@ private slots:
     bool log_in() const;
 
     void go_back();
-    void handle_server_cmd(Command cmd, QString message) const;
+    void handle_server_cmd(Command cmd, QString message);
 
 public:
     explicit LoginWindow(QWidget* parent = nullptr);

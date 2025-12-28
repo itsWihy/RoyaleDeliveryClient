@@ -24,7 +24,9 @@ set(PROJECT_SOURCES
         headers/net/commands.h
         source/windows/loginwindow.cpp
         headers/windows/loginwindow.h
-        headers/windows/popups.h
+        headers/windows/windowutils.h
+        source/windows/mainmailwindow.cpp
+        headers/windows/mainmailwindow.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

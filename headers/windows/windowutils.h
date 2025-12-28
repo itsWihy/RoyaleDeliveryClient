@@ -19,4 +19,10 @@ inline bool success_popup(const QMainWindow* const window, const QString &succes
     return true;
 }
 
+inline void openAndClose(QMainWindow* close, QMainWindow* open) {
+    open->show();
+    close->close();
+    close->deleteLater();
+}
+
 #endif //ROYALEDELIVERYCLIENT_POPUPS_H

@@ -8,8 +8,9 @@
 #include <qstatusbar.h>
 
 #include "../../headers/net/remotepi.h"
+#include "../../headers/windows/mainmailwindow.h"
 #include "../../headers/windows/mainwindow.h"
-#include "../../headers/windows/popups.h"
+#include "../../headers/windows/windowutils.h"
 
 LoginWindow::LoginWindow(QWidget *parent) : QMainWindow(parent),
                                             name_button(this),
@@ -51,14 +52,17 @@ bool LoginWindow::log_in() const {
 }
 
 
-void LoginWindow::handle_server_cmd(const Command cmd, QString message) const {
+void LoginWindow::handle_server_cmd(const Command cmd, QString message) {
     if (!message.startsWith("LOGIN")) return;
 
     if (cmd == STATUS) {
         message.remove(0,5);
 
         if (message == "TRUE") {
-            success_popup(this, "Successfully logined!!!!");
+            auto* window = new MainMailWindow();
+            success_popup(window, "Logging you in...");
+            openAndClose(this, window);
+
         } else {
             error_popup(this, "Something went wrong.. check connection and try a different username/password ");
         }
@@ -67,9 +71,7 @@ void LoginWindow::handle_server_cmd(const Command cmd, QString message) const {
 
 
 void LoginWindow::go_back() {
-    auto* window = new MainWindow();
-    window->show();
-    this->close();
+    openAndClose(this, new MainWindow());
 }
 
 LoginWindow::~LoginWindow() = default;
