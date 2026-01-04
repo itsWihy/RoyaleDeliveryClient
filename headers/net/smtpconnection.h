@@ -34,19 +34,19 @@ signals:
     void status(const QString &msg);
 
 private slots:
-    void disconnected();
-    void connected();
-    void readyRead();
+    void ready_read();
+    static void handle_error(QAbstractSocket::SocketError socketError) ;
 
 private:
-    QTextStream *text_stream;
-    QTcpSocket *connection;
+    QTcpSocket connection;
     QString message;
     QString from;
     QString recipient;
     QString response;
 
     State state;
+
+    bool is_connected() const;
 };
 
 #endif //ROYALEDELIVERYCLIENT_SMTPCONNECTION_H

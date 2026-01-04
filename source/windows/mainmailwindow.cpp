@@ -7,6 +7,8 @@
 #include <qboxlayout.h>
 #include <qlistwidget.h>
 
+#include "../../headers/net/smtpconnection.h"
+
 MainMailWindow::MainMailWindow(QWidget *parent)
     : QMainWindow(parent), central(this), compose_button("Compose", this), mailList(this), separator(this) {
     setFixedSize(1000, 600);
@@ -35,6 +37,8 @@ MainMailWindow::MainMailWindow(QWidget *parent)
     mainLayout->addWidget(&mailList);
     mainLayout->addWidget(&separator);
     mainLayout->addLayout(bottomLayout);
+
+    connect(&compose_button, &QPushButton::clicked, this, &MainMailWindow::compose);
 }
 
 //TODO: CMD to retrieve emails from server, add to list here.

@@ -22,6 +22,10 @@ private:
 public:
     explicit MainMailWindow(QWidget* parent = nullptr);
     ~MainMailWindow() override;
+
+public slots:
+    void compose();
+
 };
 
 
