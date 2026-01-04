@@ -29,8 +29,7 @@ SmtpConnection::SmtpConnection(const QString &from, const QString &to, const QSt
     if (connection.waitForConnected(30000)) { qDebug("Connected to SMTP server"); }
 }
 
-SmtpConnection::~SmtpConnection() {
-}
+SmtpConnection::~SmtpConnection() = default;
 
 void SmtpConnection::ready_read() {
     QString responseLine;

@@ -1,0 +1,11 @@
+//
+// Created by Wihy on 1/4/26.
+//
+
+#ifndef ROYALEDELIVERYCLIENT_GLOBALS_H
+#define ROYALEDELIVERYCLIENT_GLOBALS_H
+#include <QString>
+
+inline QString CLIENT_NAME;
+
+#endif //ROYALEDELIVERYCLIENT_GLOBALS_H

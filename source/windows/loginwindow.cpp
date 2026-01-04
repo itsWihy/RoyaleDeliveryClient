@@ -7,6 +7,7 @@
 #include <qlabel.h>
 #include <qstatusbar.h>
 
+#include "../../headers/globals.h"
 #include "../../headers/net/remotepi.h"
 #include "../../headers/windows/mainmailwindow.h"
 #include "../../headers/windows/mainwindow.h"
@@ -35,6 +36,7 @@ LoginWindow::LoginWindow(QWidget *parent) : QMainWindow(parent),
 
     connect(&log_in_button, &QPushButton::clicked, this, &LoginWindow::log_in);
     connect(&go_back_button, &QPushButton::clicked, this, &LoginWindow::go_back);
+
     connect(&RemotePi::get_instance(), SIGNAL(server_message_received(Command,QString)), this, SLOT(handle_server_cmd(Command,QString)));
 }
 
@@ -48,6 +50,7 @@ bool LoginWindow::log_in() const {
     if (const bool success = RemotePi::get_instance().log_in(name, password); !success)
         return error_popup(this, "Couldn't reach server");
 
+    CLIENT_NAME = name;
     return true;
 }
 

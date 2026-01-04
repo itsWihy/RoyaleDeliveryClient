@@ -29,6 +29,7 @@ set(PROJECT_SOURCES
         headers/windows/mainmailwindow.h
         source/net/smtpconnection.cpp
         headers/net/smtpconnection.h
+        headers/globals.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

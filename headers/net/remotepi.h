@@ -37,10 +37,12 @@ public:
 
     bool sign_up(const QString &name, const QString &password);
     bool log_in(const QString& name, const QString& password);
+    bool delete_mail(const QString& hash);
+    bool fetch_emails();
 
 signals:
     void server_message_received(Command cmd, QString message) const;
-
+    void received_all_mails(QVector<Email> mails) const;
 };
 
 #endif // REMOTEPI_H
