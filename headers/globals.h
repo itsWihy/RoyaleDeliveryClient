@@ -7,5 +7,6 @@
 #include <QString>
 
 inline QString CLIENT_NAME;
+inline QString RAW_PASSWORD;
 
 #endif //ROYALEDELIVERYCLIENT_GLOBALS_H

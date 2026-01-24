@@ -51,6 +51,7 @@ bool LoginWindow::log_in() const {
         return error_popup(this, "Couldn't reach server");
 
     CLIENT_NAME = name;
+    RAW_PASSWORD = password;
     return true;
 }
 

@@ -7,7 +7,7 @@
 #include <QObject>
 #include <qobjectdefs.h>
 
-#include <QTcpSocket>
+#include <QSslSocket>
 #include <QString>
 #include <QTextStream>
 #include <QDebug>
@@ -15,6 +15,11 @@
 
 enum class State {
     INIT,
+    TLS_REQ,
+    TLS_START,
+    AUTH_REQ,
+    AUTH_USER,
+    AUTH_PASS,
     MAIL,
     RCPT,
     DATA,
@@ -37,8 +42,10 @@ private slots:
     void ready_read();
     static void handle_error(QAbstractSocket::SocketError socketError) ;
 
+    void handle_ssl_errors(const QList<QSslError> &errors) const;
+
 private:
-    QTcpSocket connection;
+    QSslSocket connection;
     QString message;
     QString from;
     QString recipient;

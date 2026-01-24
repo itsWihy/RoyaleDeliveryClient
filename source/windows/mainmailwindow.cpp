@@ -26,6 +26,17 @@ MainMailWindow::MainMailWindow(QWidget *parent)
 
     auto *rootLayout = new QVBoxLayout(&central);
 
+    auto welcomeLabel = new QLabel("Welcome, " + CLIENT_NAME, this);
+    welcomeLabel->setStyleSheet(
+        "font-size: 18px; "
+        "font-weight: bold; "
+        "color: #00000f; "
+        "padding: 10px;"
+    );
+    welcomeLabel->setAlignment(Qt::AlignCenter);
+
+    rootLayout->addWidget(welcomeLabel);
+
     stackedWidget = new QStackedWidget(this);
     rootLayout->addWidget(stackedWidget);
 
@@ -158,23 +169,26 @@ void MainMailWindow::display_mails_from_server(const QVector<Email> &emails) {
     mailList.clear();
     currentEmails = emails;
 
+    const QString myEmail = CLIENT_NAME + "@royalemail.com";
+
     for (const auto &email: emails) {
-        mailList.addItem(QString(email.subject + "\n" + email.from));
+        QString statusPrefix = (email.from == myEmail) ? "[SENT] " : "[RECEIVED] ";
+        QString routingInfo = QString("From: %1 → To: %2").arg(email.from, email.to);
+
+        QString displayText = QString("%1 %2\n%3")
+                .arg(statusPrefix)
+                .arg(email.subject)
+                .arg(routingInfo);
+
+        mailList.addItem(displayText);
     }
 }
 
 void MainMailWindow::delete_mail_from_server(const Email &email) const {
-    const std::string full_email = "To: " + email.to.toStdString() + "\r\n" +
-                             "From: " + email.from.toStdString() + "\r\n" +
-                             "Subject: " + email.subject.toStdString() + "\r\n" +
-                             email.content.toStdString() + "\r\n";
-//To: gas\r\nFrom: f@royalemail.com\r\nSubject: gsg\r\ngasg\r\n
-    std::cout << full_email;
-
-    const auto hashed_value = hash(full_email);
+    const auto hashed_value = hash(email.content.toStdString());
     RemotePi::get_instance().delete_mail(QString::fromStdString(hashed_value));
 
-    std::cout << "Deleting mail of hash: " << hashed_value  << std::endl;;
+    std::cout << "Deleting mail of hash: " << hashed_value << std::endl;;
 
     RemotePi::get_instance().fetch_emails();
     stackedWidget->setCurrentIndex(0);
