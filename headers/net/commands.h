@@ -50,7 +50,7 @@ inline QByteArray pack_data(const Command cmd_type, const QStringList &parameter
 
 inline std::string hash(const std::string &password) {
     const QByteArray data = QString(password.data()).toUtf8();
-    return QString::fromUtf8(QCryptographicHash::hash(data, QCryptographicHash::Sha256)).toStdString();
+    return QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex().toStdString();
 }
 
 #endif //ROYALEDELIVERYSERVER_COMMANDS_H

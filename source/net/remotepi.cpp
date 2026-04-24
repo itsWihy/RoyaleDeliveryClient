@@ -1,5 +1,5 @@
 #include "../../headers/net/remotepi.h"
-
+#include "../../headers/globals.h"
 #include <iostream>
 #include <QtNetwork>
 #include <QtWidgets>
@@ -69,7 +69,7 @@ void RemotePi::handle_server_data() const {
 void RemotePi::connect_to_pi() {
     std::cout << "Connecting to PI..." << std::endl;
     connection.abort();
-    connection.connectToHost(QHostAddress("192.168.1.156"), 5004);
+    connection.connectToHost(QHostAddress(PI_ADDRESS), 5004);
 }
 
 bool RemotePi::sign_up(const QString &name, const QString &password) {

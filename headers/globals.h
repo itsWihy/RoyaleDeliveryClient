@@ -6,6 +6,8 @@
 #define ROYALEDELIVERYCLIENT_GLOBALS_H
 #include <QString>
 
+#define PI_ADDRESS "127.0.0.1" //FOR PROD USE 192.168.1.156
+
 inline QString CLIENT_NAME;
 inline QString RAW_PASSWORD;
 

@@ -15,6 +15,7 @@ SmtpConnection::SmtpConnection(const QString &from, const QString &to, const QSt
                                const QString &body) : connection(this) {
     connect(&connection, &QTcpSocket::readyRead, this, &SmtpConnection::ready_read);
     connect(&connection, &QAbstractSocket::errorOccurred, this, &SmtpConnection::handle_error);
+    connect(&connection, &QSslSocket::sslErrors, this, &SmtpConnection::handle_ssl_errors);
 
     message = "To: " + to + "\r\n";
     message.append("From: " + from + "\r\n");
@@ -23,7 +24,6 @@ SmtpConnection::SmtpConnection(const QString &from, const QString &to, const QSt
     message.append(body);
 
     message.replace("\n.", "\n..");
-
     message.replace(QString::fromLatin1("\n"), QString::fromLatin1("\r\n"));
     message.replace(QString::fromLatin1("\r\r\n"), QString::fromLatin1("\r\n"));
 
@@ -31,15 +31,10 @@ SmtpConnection::SmtpConnection(const QString &from, const QString &to, const QSt
     recipient = to;
     state = State::INIT;
 
-    const QSslConfiguration config = connection.sslConfiguration();
-    connection.setSslConfiguration(config);
     connection.setPeerVerifyMode(QSslSocket::VerifyNone);
+    connection.ignoreSslErrors();
 
-    connection.connectToHost(QHostAddress("192.168.1.156"), 2500); //todo pi.
-
-    if (connection.waitForConnected(30000)) { qDebug("Connected to SMTP server"); }
-
-    connect(&connection, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(handle_ssl_errors(QList<QSslError>)));
+    connection.connectToHost(QHostAddress(PI_ADDRESS), 2500);
 }
 
 SmtpConnection::~SmtpConnection() = default;
@@ -129,11 +124,8 @@ void SmtpConnection::handle_error(const QAbstractSocket::SocketError socketError
     std::cerr << "[Socket Error] Code: " << socketError << ", Message: " << errorMessage << std::endl;
 }
 void SmtpConnection::handle_ssl_errors(const QList<QSslError> &errors) const {
-    for (const auto &error : errors) {
-        qWarning() << "[SSL Error]:" << error.errorString();
-    }
-
-    qobject_cast<QSslSocket*>(sender())->ignoreSslErrors();
+    for (const auto &error : errors)
+        qWarning() << "[SSL Error ignored]:" << error.errorString();
 }
 
 bool SmtpConnection::is_connected() const {
