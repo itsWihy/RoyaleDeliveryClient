@@ -2,6 +2,7 @@
 #define ROYALEDELIVERYSERVER_COMMANDS_H
 #include <QCryptographicHash>
 #include <QDataStream>
+#include <QIODevice>
 
 enum Command {
     SIGN_UP,
