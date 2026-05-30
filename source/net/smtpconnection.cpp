@@ -44,7 +44,7 @@ void SmtpConnection::ready_read() {
         QString line = connection.readLine().trimmed();
         QString code = line.left(3);
 
-        if (line.length() >= 4 && line[3] == '-') {
+        if (line.length() >= 4 && line[3] == '-') { //If it is a multi line response, skip. Only care about last one.
             continue;
         }
 
