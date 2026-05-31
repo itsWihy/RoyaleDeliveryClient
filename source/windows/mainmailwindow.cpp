@@ -155,23 +155,29 @@ void MainMailWindow::compose() const {
     const QString subject = subjectEdit->text();
     const QString body = bodyEdit->toPlainText();
 
-    new SmtpConnection{CLIENT_NAME + "@royalemail.com", to, subject, body};
+    SmtpConnection *connection = new SmtpConnection{CLIENT_NAME + "@royalemail.com", to, subject, body};
+
+    connect(connection, &SmtpConnection::status, this, [](const QString &message) {
+        if (message == tr("Message sent"))
+            RemotePi::get_instance().fetch_emails();
+    }); //Verify we sent the signal. only after, refetch emails.
 
     recipientEdit->clear();
     subjectEdit->clear();
     bodyEdit->clear();
 
     stackedWidget->setCurrentIndex(0);
-    RemotePi::get_instance().fetch_emails();
 }
 
 void MainMailWindow::display_mails_from_server(const QVector<Email> &emails) {
+    mailList.blockSignals(true);
+
     mailList.clear();
     currentEmails = emails;
 
     const QString myEmail = CLIENT_NAME + "@royalemail.com";
 
-    for (const auto &email: emails) {
+    for (const Email &email: emails) {
         QString statusPrefix = (email.from == myEmail) ? "[SENT] " : "[RECEIVED] ";
         QString routingInfo = QString("From: %1 → To: %2").arg(email.from, email.to);
 
@@ -182,14 +188,25 @@ void MainMailWindow::display_mails_from_server(const QVector<Email> &emails) {
 
         mailList.addItem(displayText);
     }
+
+
+    mailList.blockSignals(false);
+    mailList.setCurrentRow(-1); //set to no row selected.
+    mailList.clearSelection();
 }
 
-void MainMailWindow::delete_mail_from_server(const Email &email) const {
+void MainMailWindow::delete_mail_from_server(const Email &email) {
     const auto hashed_value = hash(email.content.toStdString());
     RemotePi::get_instance().delete_mail(QString::fromStdString(hashed_value));
 
     std::cout << "Deleting mail of hash: " << hashed_value << std::endl;;
 
-    RemotePi::get_instance().fetch_emails();
+    mailList.blockSignals(true);
+    mailList.clear();
+    currentEmails.clear();
+    mailList.setCurrentRow(-1);
+    mailList.blockSignals(false);
+
     stackedWidget->setCurrentIndex(0);
+    RemotePi::get_instance().fetch_emails();
 }

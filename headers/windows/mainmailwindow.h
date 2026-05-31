@@ -44,7 +44,7 @@ public:
 
 private slots:
     void display_mails_from_server(const QVector<Email>& emails);
-    void delete_mail_from_server(const Email &email) const;
+    void delete_mail_from_server(const Email &email);
 
 public slots:
     void compose() const;
