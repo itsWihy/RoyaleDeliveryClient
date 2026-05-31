@@ -15,7 +15,8 @@ SmtpConnection::SmtpConnection(const QString &from, const QString &to, const QSt
                                const QString &body) : connection(this) {
     connect(&connection, &QTcpSocket::readyRead, this, &SmtpConnection::ready_read);
     connect(&connection, &QAbstractSocket::errorOccurred, this, &SmtpConnection::handle_error);
-    connect(&connection, &QSslSocket::sslErrors, this, &SmtpConnection::handle_ssl_errors);
+
+    connect(&connection, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(handle_ssl_errors(QList<QSslError>)));
 
     message = "To: " + to + "\r\n";
     message.append("From: " + from + "\r\n");
