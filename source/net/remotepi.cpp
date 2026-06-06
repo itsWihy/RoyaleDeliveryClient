@@ -7,15 +7,46 @@
 #include "../../headers/windows/signupwindow.h"
 
 
+/**
+ * @file remotepi.cpp
+ * @brief Implementation of the RemotePi singleton for server communication.
+ */
+
+#include "../../headers/net/remotepi.h"
+#include "../../headers/globals.h"
+#include <iostream>
+#include <QtNetwork>
+#include <QtWidgets>
+
+#include "../../headers/windows/signupwindow.h"
+
+
+/**
+ * @brief Constructor for RemotePi.
+ * Sets up the internal QTcpSocket and connects signals for errors and incoming data.
+ */
 RemotePi::RemotePi() : connection(this) {
     connect(&connection, &QAbstractSocket::errorOccurred, this, &RemotePi::handle_error);
     connect(&connection, &QTcpSocket::readyRead, this, &RemotePi::handle_server_data);
 }
 
+/**
+ * @brief Checks if the client is connected to the server.
+ * @return true if connected.
+ */
 bool RemotePi::is_connected() const {
     return connection.state() == QTcpSocket::ConnectedState;
 }
 
+/**
+ * @brief Internal helper to send a command with parameters to the server.
+ * 
+ * Packs the command into a standard format [size][type][data] and writes to socket.
+ * 
+ * @param cmd_type The Command to send.
+ * @param parameters The arguments for the command.
+ * @return true if write was successful.
+ */
 bool RemotePi::send_cmd_to_server(const Command cmd_type, const QStringList &parameters) {
     if (!is_connected()) return false;
     const QByteArray data{pack_data(cmd_type, parameters)};
@@ -23,17 +54,27 @@ bool RemotePi::send_cmd_to_server(const Command cmd_type, const QStringList &par
     return connection.write(data) >= 0;
 }
 
+/**
+ * @brief Slot to handle incoming data from the server.
+ * 
+ * Reads raw bytes, deserializes them based on the Royale protocol, 
+ * and emits relevant signals (STATUS or ALL_MAILS).
+ */
 void RemotePi::handle_server_data() const {
     auto *socket = qobject_cast<QTcpSocket *>(sender());
 
+    // Read all available data from the socket
     QDataStream stream(socket->readAll());
     stream.setVersion(QDataStream::Qt_5_15);
 
+    // Use transactions to handle potential packet fragmentation
     stream.startTransaction();
 
     quint32 length, cmd_type, amount;
+    // Header format: [Total Length] [Command Type] [Amount (if applicable)]
     stream >> length >> cmd_type >> amount;
 
+    // If we haven't received enough data for the full header, wait for more
     if (!stream.commitTransaction()) return;
 
     switch (cmd_type) {
@@ -41,6 +82,7 @@ void RemotePi::handle_server_data() const {
             QString type, result;
             stream >> type >> result;
 
+            // Prefix the result for specific handlers (LoginWindow/SignupWindow)
             if (type == "SIGNUP")
                 result.prepend("SIGNUP");
 
@@ -54,6 +96,7 @@ void RemotePi::handle_server_data() const {
         case ALL_MAILS: {
             QVector<Email> mails;
 
+            // Deserialize 'amount' of Email objects from the stream
             for (int i = 0; i < amount; ++i) {
                 Email email;
                 stream >> email;
@@ -66,28 +109,56 @@ void RemotePi::handle_server_data() const {
     }
 }
 
+/**
+ * @brief Connects to the server at PI_ADDRESS on port 5004.
+ */
 void RemotePi::connect_to_pi() {
     std::cout << "Connecting to PI..." << std::endl;
-    connection.abort();
+    connection.abort(); // Cancel any existing attempt
     connection.connectToHost(QHostAddress(PI_ADDRESS), 5004);
 }
 
+/**
+ * @brief Requests account registration.
+ * @param name Username.
+ * @param password Plain-text password.
+ * @return true if command was sent.
+ */
 bool RemotePi::sign_up(const QString &name, const QString &password) {
     return send_cmd_to_server(SIGN_UP, {name, password});
 }
 
+/**
+ * @brief Requests authentication.
+ * @param name Username.
+ * @param password Plain-text password.
+ * @return true if command was sent.
+ */
 bool RemotePi::log_in(const QString &name, const QString &password) {
     return send_cmd_to_server(LOG_IN, {name, password});
 }
 
+/**
+ * @brief Requests deletion of a specific email.
+ * @param hash The unique hex hash of the mail.
+ * @return true if command was sent.
+ */
 bool RemotePi::delete_mail(const QString &hash) {
     return send_cmd_to_server(DELETE_A_MAIL, {hash});
 }
 
+/**
+ * @brief Requests all emails for the current user.
+ * @return true if command was sent.
+ */
 bool RemotePi::fetch_emails() {
     return send_cmd_to_server(ALL_MAILS, {});
 }
 
+/**
+ * @brief Standardized error handler for socket operations.
+ * Logs descriptive error messages to stderr.
+ */
 void RemotePi::handle_error(const QAbstractSocket::SocketError socketError) {
     const char *errorMessage = nullptr;
 

@@ -18,6 +18,37 @@
 
 #include "../../headers/globals.h"
 
+/**
+ * @file mainmailwindow.cpp
+ * @brief Implementation of the main mail application window.
+ */
+
+#include "../../headers/windows/mainmailwindow.h"
+
+#include <iostream>
+#include <qboxlayout.h>
+#include <qlistwidget.h>
+
+#include "../../headers/net/remotepi.h"
+#include "../../headers/net/smtpconnection.h"
+
+#include <QLabel>
+#include <qlineedit.h>
+#include <QStackedWidget>
+#include <qtextedit.h>
+
+#include "../../headers/globals.h"
+
+/**
+ * @brief Constructs the MainMailWindow.
+ * 
+ * Sets up the complex multi-page layout using QStackedWidget. Pages include:
+ * 0: Inbox (list of emails)
+ * 1: Compose (writing a new email)
+ * 2: View (reading a selected email)
+ * 
+ * @param parent Parent widget.
+ */
 MainMailWindow::MainMailWindow(QWidget *parent)
     : QMainWindow(parent), central(this), compose_button("Compose", this), mailList(this), separator(this) {
     setFixedSize(1000, 600);
@@ -26,6 +57,7 @@ MainMailWindow::MainMailWindow(QWidget *parent)
 
     auto *rootLayout = new QVBoxLayout(&central);
 
+    // Welcome label at the top
     auto welcomeLabel = new QLabel("Welcome, " + CLIENT_NAME, this);
     welcomeLabel->setStyleSheet(
         "font-size: 18px; "
@@ -40,7 +72,7 @@ MainMailWindow::MainMailWindow(QWidget *parent)
     stackedWidget = new QStackedWidget(this);
     rootLayout->addWidget(stackedWidget);
 
-
+    // --- Page 0: Inbox ---
     inboxPage = new QWidget();
     auto *inboxLayout = new QVBoxLayout(inboxPage);
 
@@ -65,6 +97,7 @@ MainMailWindow::MainMailWindow(QWidget *parent)
     inboxLayout->addWidget(&separator);
     inboxLayout->addLayout(bottomLayout);
 
+    // --- Page 1: Compose ---
     composePage = new QWidget();
     const auto compose_layout = new QVBoxLayout(composePage);
 
@@ -91,6 +124,7 @@ MainMailWindow::MainMailWindow(QWidget *parent)
     compose_layout->addWidget(bodyEdit);
     compose_layout->addLayout(compose_buttons);
 
+    // --- Page 2: View Email ---
     viewPage = new QWidget();
     auto *viewLayout = new QVBoxLayout(viewPage);
 
@@ -118,6 +152,7 @@ MainMailWindow::MainMailWindow(QWidget *parent)
     stackedWidget->addWidget(composePage);
     stackedWidget->addWidget(viewPage);
 
+    // Navigation and Logic Connections
     auto refreshAndGoHome = [this] {
         mailList.clearSelection();
         RemotePi::get_instance().fetch_emails();
@@ -130,12 +165,14 @@ MainMailWindow::MainMailWindow(QWidget *parent)
 
     connect(send_button, &QPushButton::clicked, this, &MainMailWindow::compose);
 
+    // Handle mail deletion
     connect(deleteBtn, &QPushButton::clicked, this, [this] {
         if (const int row = mailList.currentRow(); row >= 0 && row < currentEmails.size()) {
             this->delete_mail_from_server(currentEmails[row]);
         }
     });
 
+    // Handle selecting a mail from the list to view it
     connect(&mailList, &QListWidget::currentRowChanged, this, [this](const int row) {
         if (row >= 0 && row < currentEmails.size()) {
             const auto &email = currentEmails[row];
@@ -146,22 +183,33 @@ MainMailWindow::MainMailWindow(QWidget *parent)
         }
     });
 
+    // Initial fetch of emails from the server
     RemotePi::get_instance().fetch_emails();
+    // Connect to server signal to update list when data arrives
     connect(&RemotePi::get_instance(), &RemotePi::received_all_mails, this, &MainMailWindow::display_mails_from_server);
 }
 
+/**
+ * @brief Collects data from the Compose page and sends an email via SmtpConnection.
+ * 
+ * Creates a new SmtpConnection (which handles the SMTP protocol asynchronously).
+ * Clears the fields and returns to the Inbox upon initiation.
+ */
 void MainMailWindow::compose() const {
     const QString to = recipientEdit->text();
     const QString subject = subjectEdit->text();
     const QString body = bodyEdit->toPlainText();
 
+    // Initiate SMTP transmission
     SmtpConnection *connection = new SmtpConnection{CLIENT_NAME + "@royalemail.com", to, subject, body};
 
+    // When SMTP finishes, refresh the inbox to show the sent mail
     connect(connection, &SmtpConnection::status, this, [](const QString &message) {
         if (message == tr("Message sent"))
             RemotePi::get_instance().fetch_emails();
-    }); //Verify we sent the signal. only after, refetch emails.
+    });
 
+    // Reset UI
     recipientEdit->clear();
     subjectEdit->clear();
     bodyEdit->clear();
@@ -169,8 +217,15 @@ void MainMailWindow::compose() const {
     stackedWidget->setCurrentIndex(0);
 }
 
+/**
+ * @brief Populates the QListWidget with Email objects received from the server.
+ * 
+ * Differentiates between [SENT] and [RECEIVED] mails based on the sender's address.
+ * 
+ * @param emails List of Email objects to display.
+ */
 void MainMailWindow::display_mails_from_server(const QVector<Email> &emails) {
-    mailList.blockSignals(true);
+    mailList.blockSignals(true); // Prevent triggering currentRowChanged while clearing
 
     mailList.clear();
     currentEmails = emails;
@@ -191,16 +246,24 @@ void MainMailWindow::display_mails_from_server(const QVector<Email> &emails) {
 
 
     mailList.blockSignals(false);
-    mailList.setCurrentRow(-1); //set to no row selected.
+    mailList.setCurrentRow(-1); // Reset selection
     mailList.clearSelection();
 }
 
+/**
+ * @brief Requests the server to delete a specific email.
+ * 
+ * Computes the hash of the email content and sends a DELETE_A_MAIL command.
+ * 
+ * @param email The Email object to delete.
+ */
 void MainMailWindow::delete_mail_from_server(const Email &email) {
     const auto hashed_value = hash(email.content.toStdString());
     RemotePi::get_instance().delete_mail(QString::fromStdString(hashed_value));
 
     std::cout << "Deleting mail of hash: " << hashed_value << std::endl;;
 
+    // Optimistically clear the list and reset view before refresh
     mailList.blockSignals(true);
     mailList.clear();
     currentEmails.clear();
@@ -208,5 +271,6 @@ void MainMailWindow::delete_mail_from_server(const Email &email) {
     mailList.blockSignals(false);
 
     stackedWidget->setCurrentIndex(0);
+    // Refresh list from server to reflect deletion
     RemotePi::get_instance().fetch_emails();
 }
