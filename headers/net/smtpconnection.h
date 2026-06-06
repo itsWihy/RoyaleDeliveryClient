@@ -24,7 +24,8 @@
 enum class State {
     INIT,       ///< Initial connection state.
     TLS_REQ,    ///< Requesting STARTTLS.
-    TLS_START,  ///< Negotiating SSL/TLS handshake.
+    TLS_START,  ///< Initiating SSL/TLS.
+    TLS_HANDSHAKE, ///< Negotiating SSL/TLS handshake.
     AUTH_REQ,   ///< Requesting authentication (LOGIN).
     AUTH_USER,  ///< Sending username.
     AUTH_PASS,  ///< Sending password.
@@ -90,6 +91,11 @@ private slots:
      * @param errors A list of SSL errors encountered.
      */
     void handle_ssl_errors(const QList<QSslError> &errors) const;
+
+    /**
+     * @brief Slot triggered when the SSL handshake is successfully completed.
+     */
+    void on_encrypted();
 
 private:
     QSslSocket connection; ///< The SSL-capable socket for the SMTP connection.

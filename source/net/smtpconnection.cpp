@@ -41,6 +41,7 @@ SmtpConnection::SmtpConnection(const QString &from, const QString &to, const QSt
     // Connect networking and SSL signals
     connect(&connection, &QTcpSocket::readyRead, this, &SmtpConnection::ready_read);
     connect(&connection, &QAbstractSocket::errorOccurred, this, &SmtpConnection::handle_error);
+    connect(&connection, &QSslSocket::encrypted, this, &SmtpConnection::on_encrypted);
     connect(&connection, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(handle_ssl_errors(QList<QSslError>)));
 
     // Prepare the email message with CRLF line endings
@@ -100,9 +101,7 @@ void SmtpConnection::ready_read() {
         } else if (state == State::TLS_START && code == "220") {
             // Start the SSL/TLS handshake
             connection.startClientEncryption();
-            // Re-identify after upgrading to TLS
-            connection.write("EHLO RoyaleClient\r\n");
-            state = State::AUTH_REQ;
+            state = State::TLS_HANDSHAKE;
         } else if (state == State::AUTH_REQ && code == "250") {
             // Request login authentication
             connection.write("AUTH LOGIN\r\n");
@@ -183,11 +182,24 @@ void SmtpConnection::handle_error(const QAbstractSocket::SocketError socketError
 }
 
 /**
- * @brief Logs SSL errors encountered during handshake.
+ * @brief Logs SSL errors encountered during handshake and ignores them for development.
  */
 void SmtpConnection::handle_ssl_errors(const QList<QSslError> &errors) const {
     for (const auto &error : errors)
         qWarning() << "[SSL Error ignored]:" << error.errorString();
+
+    const_cast<QSslSocket&>(connection).ignoreSslErrors();
+}
+
+/**
+ * @brief Handles the completion of the SSL handshake.
+ */
+void SmtpConnection::on_encrypted() {
+    if (state == State::TLS_HANDSHAKE) {
+        qDebug() << "SSL Handshake successful, re-identifying...";
+        connection.write("EHLO RoyaleClient\r\n");
+        state = State::AUTH_REQ;
+    }
 }
 
 /**

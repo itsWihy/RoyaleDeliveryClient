@@ -15,7 +15,7 @@
  * @brief The IP address or hostname of the server (Remote Pi).
  * Updated to use the production domain.
  */
-#define PI_ADDRESS ERROR_ON_PURPOSE //FOR PROD USE you know what
+#define PI_ADDRESS "100.97.85.5" // Tailscale IP for secure remote access without port forwarding
 
 /**
  * @brief Global variable storing the currently authenticated client's name.
