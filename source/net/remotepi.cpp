@@ -111,11 +111,12 @@ void RemotePi::handle_server_data() const {
 
 /**
  * @brief Connects to the server at PI_ADDRESS on port 5004.
+ * Uses hostname resolution to support domains.
  */
 void RemotePi::connect_to_pi() {
     std::cout << "Connecting to PI..." << std::endl;
     connection.abort(); // Cancel any existing attempt
-    connection.connectToHost(QHostAddress(PI_ADDRESS), 5004);
+    connection.connectToHost(PI_ADDRESS, 5004);
 }
 
 /**

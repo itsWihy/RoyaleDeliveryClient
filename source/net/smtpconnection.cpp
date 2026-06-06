@@ -64,8 +64,8 @@ SmtpConnection::SmtpConnection(const QString &from, const QString &to, const QSt
     connection.setPeerVerifyMode(QSslSocket::VerifyNone);
     connection.ignoreSslErrors();
 
-    // Connect to the local SMTP server port
-    connection.connectToHost(QHostAddress(PI_ADDRESS), 2500);
+    // Connect to the remote SMTP server port using hostname resolution
+    connection.connectToHost(PI_ADDRESS, 2500);
 }
 
 /**

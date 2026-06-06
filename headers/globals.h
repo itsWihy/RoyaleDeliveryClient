@@ -12,10 +12,10 @@
 #include <QString>
 
 /**
- * @brief The IP address of the server (Remote Pi).
- * Defaults to localhost for development.
+ * @brief The IP address or hostname of the server (Remote Pi).
+ * Updated to use the production domain.
  */
-#define PI_ADDRESS "127.0.0.1" //FOR PROD USE 192.168.1.156
+#define PI_ADDRESS ERROR_ON_PURPOSE //FOR PROD USE you know what
 
 /**
  * @brief Global variable storing the currently authenticated client's name.
