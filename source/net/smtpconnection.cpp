@@ -12,20 +12,6 @@
 #include "../../headers/net/commands.h"
 
 /**
- * @file smtpconnection.cpp
- * @brief Implementation of the SMTP protocol client for sending emails.
- */
-
-#include "../../headers/net/smtpconnection.h"
-
-#include <iostream>
-#include <qhostaddress.h>
-#include <QSslConfiguration>
-
-#include "../../headers/globals.h"
-#include "../../headers/net/commands.h"
-
-/**
  * @brief Constructs an SMTP connection and prepares the email message.
  * 
  * Formats the email headers (To, From, Subject) and body according to RFC standards,

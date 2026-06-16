@@ -15,10 +15,12 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <qtextedit.h>
+#include <QVector>
+
+#include "../net/commands.h"
 
 
 class QLabel;
-struct Email;
 
 /**
  * @class MainMailWindow

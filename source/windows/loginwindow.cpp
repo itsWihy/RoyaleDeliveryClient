@@ -14,22 +14,6 @@
 #include "../../headers/windows/windowutils.h"
 
 /**
- * @file loginwindow.cpp
- * @brief Implementation of the login window UI and logic.
- */
-
-#include "../../headers/windows/loginwindow.h"
-
-#include <qlabel.h>
-#include <qstatusbar.h>
-
-#include "../../headers/globals.h"
-#include "../../headers/net/remotepi.h"
-#include "../../headers/windows/mainmailwindow.h"
-#include "../../headers/windows/mainwindow.h"
-#include "../../headers/windows/windowutils.h"
-
-/**
  * @brief Constructs the LoginWindow.
  * 
  * Initializes UI components, sets up layouts manually, and connects signals 

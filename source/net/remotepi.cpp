@@ -8,20 +8,6 @@
 
 
 /**
- * @file remotepi.cpp
- * @brief Implementation of the RemotePi singleton for server communication.
- */
-
-#include "../../headers/net/remotepi.h"
-#include "../../headers/globals.h"
-#include <iostream>
-#include <QtNetwork>
-#include <QtWidgets>
-
-#include "../../headers/windows/signupwindow.h"
-
-
-/**
  * @brief Constructor for RemotePi.
  * Sets up the internal QTcpSocket and connects signals for errors and incoming data.
  */

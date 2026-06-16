@@ -19,27 +19,6 @@
 #include "../../headers/globals.h"
 
 /**
- * @file mainmailwindow.cpp
- * @brief Implementation of the main mail application window.
- */
-
-#include "../../headers/windows/mainmailwindow.h"
-
-#include <iostream>
-#include <qboxlayout.h>
-#include <qlistwidget.h>
-
-#include "../../headers/net/remotepi.h"
-#include "../../headers/net/smtpconnection.h"
-
-#include <QLabel>
-#include <qlineedit.h>
-#include <QStackedWidget>
-#include <qtextedit.h>
-
-#include "../../headers/globals.h"
-
-/**
  * @brief Constructs the MainMailWindow.
  * 
  * Sets up the complex multi-page layout using QStackedWidget. Pages include:
