@@ -179,21 +179,47 @@ void MainMailWindow::compose() const {
     const QString subject = subjectEdit->text();
     const QString body = bodyEdit->toPlainText();
 
+    if (to.isEmpty() || subject.isEmpty() || body.isEmpty()) {
+        QMessageBox::warning(const_cast<MainMailWindow*>(this), tr("Validation Error"), tr("Please fill in all fields before sending."));
+        return;
+    }
+
+    // Locate the send button to disable it during sending
+    for (auto *btn : findChildren<QPushButton*>()) {
+        if (btn->text() == "Send Mail") {
+            btn->setEnabled(false);
+            break;
+        }
+    }
+
     // Initiate SMTP transmission
     SmtpConnection *connection = new SmtpConnection{CLIENT_NAME + "@royalemail.com", to, subject, body};
 
-    // When SMTP finishes, refresh the inbox to show the sent mail
-    connect(connection, &SmtpConnection::status, this, [](const QString &message) {
-        if (message == tr("Message sent"))
+    // When SMTP finishes, refresh the inbox to show the sent mail and show feedback
+    // Use Qt::QueuedConnection to prevent nested event loops (from QMessageBox) 
+    // from processing events that might delete the SmtpConnection while its readyRead is on the stack.
+    connect(connection, &SmtpConnection::status, this, [this](const QString &message) {
+        // Re-enable send button
+        for (auto *btn : findChildren<QPushButton*>()) {
+            if (btn->text() == "Send Mail") {
+                btn->setEnabled(true);
+                break;
+            }
+        }
+
+        if (message == tr("Message sent")) {
+            QMessageBox::information(const_cast<MainMailWindow*>(this), tr("Success"), tr("Email sent successfully!"));
             RemotePi::get_instance().fetch_emails();
-    });
-
-    // Reset UI
-    recipientEdit->clear();
-    subjectEdit->clear();
-    bodyEdit->clear();
-
-    stackedWidget->setCurrentIndex(0);
+            stackedWidget->setCurrentIndex(0);
+            
+            // Reset UI only on success
+            recipientEdit->clear();
+            subjectEdit->clear();
+            bodyEdit->clear();
+        } else {
+            QMessageBox::critical(const_cast<MainMailWindow*>(this), tr("Error"), message);
+        }
+    }, Qt::QueuedConnection);
 }
 
 /**

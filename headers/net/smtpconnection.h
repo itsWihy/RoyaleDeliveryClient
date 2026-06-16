@@ -84,7 +84,7 @@ private slots:
      * @brief Slot to handle socket-level errors.
      * @param socketError The error type.
      */
-    static void handle_error(QAbstractSocket::SocketError socketError) ;
+    void handle_error(QAbstractSocket::SocketError socketError) ;
 
     /**
      * @brief Slot to handle SSL-specific errors.

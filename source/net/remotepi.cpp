@@ -48,49 +48,54 @@ bool RemotePi::send_cmd_to_server(const Command cmd_type, const QStringList &par
  */
 void RemotePi::handle_server_data() const {
     auto *socket = qobject_cast<QTcpSocket *>(sender());
+    if (!socket) return;
 
-    // Read all available data from the socket
-    QDataStream stream(socket->readAll());
+    QDataStream stream(socket);
     stream.setVersion(QDataStream::Qt_5_15);
 
-    // Use transactions to handle potential packet fragmentation
-    stream.startTransaction();
+    while (true) {
+        stream.startTransaction();
 
-    quint32 length, cmd_type, amount;
-    // Header format: [Total Length] [Command Type] [Amount (if applicable)]
-    stream >> length >> cmd_type >> amount;
+        quint32 length, cmd_type, amount;
+        stream >> length >> cmd_type >> amount;
 
-    // If we haven't received enough data for the full header, wait for more
-    if (!stream.commitTransaction()) return;
-
-    switch (cmd_type) {
-        case STATUS: {
-            QString type, result;
-            stream >> type >> result;
-
-            // Prefix the result for specific handlers (LoginWindow/SignupWindow)
-            if (type == "SIGNUP")
-                result.prepend("SIGNUP");
-
-            if (type == "LOGIN")
-                result.prepend("LOGIN");
-
-            emit server_message_received(STATUS, result);
-            break;
+        if (!stream.commitTransaction()) {
+            qDebug() << "[RemotePi] Waiting for more data (current buffer size:" << socket->bytesAvailable() << ")";
+            return;
         }
 
-        case ALL_MAILS: {
-            QVector<Email> mails;
+        qDebug() << "[RemotePi] Received Packet: Type=" << cmd_type << "Amount=" << amount << "Total Length=" << length;
 
-            // Deserialize 'amount' of Email objects from the stream
-            for (int i = 0; i < amount; ++i) {
-                Email email;
-                stream >> email;
-                mails.append(email);
+        switch (cmd_type) {
+            case STATUS: {
+                QString type, result;
+                stream >> type >> result;
+                qDebug() << "[RemotePi] STATUS:" << type << result;
+
+                if (type == "SIGNUP") result.prepend("SIGNUP");
+                if (type == "LOGIN") result.prepend("LOGIN");
+
+                emit server_message_received(STATUS, result);
+                break;
             }
 
-            emit received_all_mails(mails);
-            break;
+            case ALL_MAILS: {
+                QVector<Email> mails;
+                qDebug() << "[RemotePi] Deserializing" << amount << "emails...";
+
+                for (int i = 0; i < amount; ++i) {
+                    Email email;
+                    stream >> email;
+                    mails.append(email);
+                }
+
+                qDebug() << "[RemotePi] Successfully fetched" << mails.size() << "emails.";
+                emit received_all_mails(mails);
+                break;
+            }
+            default:
+                qWarning() << "[RemotePi] Unknown command type received:" << cmd_type;
+                break;
         }
     }
 }
@@ -139,7 +144,12 @@ bool RemotePi::delete_mail(const QString &hash) {
  * @return true if command was sent.
  */
 bool RemotePi::fetch_emails() {
-    return send_cmd_to_server(ALL_MAILS, {});
+    qDebug() << "[RemotePi] Requesting ALL_MAILS for user:" << CLIENT_NAME;
+    bool success = send_cmd_to_server(ALL_MAILS, {});
+    if (!success) {
+        qWarning() << "[RemotePi] Failed to send ALL_MAILS command. Connection state:" << connection.state();
+    }
+    return success;
 }
 
 /**
@@ -173,5 +183,5 @@ void RemotePi::handle_error(const QAbstractSocket::SocketError socketError) {
             break;
     }
 
-    std::cerr << "[Socket Error] Code: " << socketError << ", Message: " << errorMessage << std::endl;
+    qWarning() << "[RemotePi Socket Error] Code:" << socketError << "Message:" << errorMessage;
 }

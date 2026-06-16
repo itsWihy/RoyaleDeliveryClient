@@ -49,6 +49,7 @@ SmtpConnection::SmtpConnection(const QString &from, const QString &to, const QSt
 
     // For this prototype, we ignore SSL verification for simplicity
     connection.setPeerVerifyMode(QSslSocket::VerifyNone);
+    connection.setPeerVerifyName(PI_ADDRESS);
     connection.ignoreSslErrors();
 
     // Connect to the remote SMTP server port using hostname resolution
@@ -70,6 +71,8 @@ void SmtpConnection::ready_read() {
     while (connection.canReadLine()) {
         QString line = connection.readLine().trimmed();
         QString code = line.left(3);
+
+        qDebug() << "[SMTP] State:" << static_cast<int>(state) << "Response:" << line;
 
         // Multi-line responses (ending in '-') are ignored until the last line (ending in ' ')
         if (line.length() >= 4 && line[3] == '-') {
@@ -97,8 +100,8 @@ void SmtpConnection::ready_read() {
             connection.write(CLIENT_NAME.toUtf8().toBase64() + "\r\n");
             state = State::AUTH_PASS;
         } else if (state == State::AUTH_PASS && code == "334") {
-            // Send base64-encoded hashed password
-            connection.write(QString::fromStdString(hash(RAW_PASSWORD.toStdString())).toUtf8().toBase64() + "\r\n");
+            // Send base64-encoded password (plain text as expected by standard SMTP)
+            connection.write(RAW_PASSWORD.toUtf8().toBase64() + "\r\n");
             state = State::MAIL;
         } else if (state == State::MAIL && code == "235") {
             // Authentication successful, specify sender
@@ -122,14 +125,19 @@ void SmtpConnection::ready_read() {
             state = State::CLOSE;
             emit status(tr("Message sent"));
         } else if (state == State::CLOSE || code == "221") {
-            // Final goodbye
-            connection.close();
-            deleteLater(); // Auto-destruct after session
-        } else {
-            // Log unexpected response codes and abort
-            qWarning() << "SMTP Error. State:" << static_cast<int>(state) << "Response:" << line;
+            // Final goodbye from server
             state = State::CLOSE;
             connection.close();
+            deleteLater();
+            return;
+        } else {
+            // Log unexpected response codes and abort
+            qWarning() << "[SMTP Error] State:" << static_cast<int>(state) << "Response:" << line;
+            state = State::CLOSE;
+            connection.close();
+            emit status(tr("Failed to send message: ") + line);
+            deleteLater();
+            return;
         }
     }
 }
@@ -138,7 +146,12 @@ void SmtpConnection::ready_read() {
  * @brief Error handler for socket failures.
  */
 void SmtpConnection::handle_error(const QAbstractSocket::SocketError socketError) {
-    const char *errorMessage = nullptr;
+    if (socketError == QAbstractSocket::RemoteHostClosedError) {
+        // This is expected when the server closes the connection after QUIT
+        return;
+    }
+
+    QString errorMessage;
 
     switch (socketError) {
         case QAbstractSocket::ConnectionRefusedError:
@@ -164,7 +177,9 @@ void SmtpConnection::handle_error(const QAbstractSocket::SocketError socketError
             break;
     }
 
-    std::cerr << "[Socket Error] Code: " << socketError << ", Message: " << errorMessage << std::endl;
+    if (state != State::CLOSE) {
+        qWarning() << "[Socket Error] Code:" << socketError << "Message:" << errorMessage;
+    }
 }
 
 /**
@@ -174,8 +189,9 @@ void SmtpConnection::handle_ssl_errors(const QList<QSslError> &errors) const {
     for (const auto &error : errors)
         qWarning() << "[SSL Error ignored]:" << error.errorString();
 
-    const_cast<QSslSocket&>(connection).ignoreSslErrors();
+    const_cast<QSslSocket&>(connection).ignoreSslErrors(errors);
 }
+
 
 /**
  * @brief Handles the completion of the SSL handshake.
